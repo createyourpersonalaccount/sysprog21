@@ -40,3 +40,10 @@ In `<linux/module.h>`, the following functions are available to view or modify t
     module_put()      /* Decrement the reference count of current module. */
     module_refcount() /* Return the value of reference count of current module. */
 
+
+# Conditional compilation for different kernel versions
+
+    /* Conditionally compile for kernel 2.6.16 or less */
+    #if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,16)
+      /* ... */
+    #endif

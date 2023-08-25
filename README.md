@@ -6,4 +6,4 @@
 - Load a module with `insmod`
 - Remove a module with `rmmod`.
 - View messages printed with `pr_info()` with `journalctl | tail`.
-
+- `MODULE_LICENSE()` information [here](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/module.h).

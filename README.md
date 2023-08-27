@@ -40,6 +40,7 @@ In `<linux/module.h>`, the following functions are available to view or modify t
     module_put()      /* Decrement the reference count of current module. */
     module_refcount() /* Return the value of reference count of current module. */
 
+This can all be accomplished better by the `.owner = THIS_MODULE` member of `struct file_operations`. See See [SA/a/6079839](https://stackoverflow.com/a/6079839) and an examplanation of the [`VFS`](https://www.kernel.org/doc/html/next/filesystems/vfs.html).
 
 # Conditional compilation for different kernel versions
 
@@ -72,3 +73,20 @@ Now `try_module_get()` presents an issue, and there is a superior alternative. S
 Writing to the device fails with `-EINVAL`.
 
 Reading from the device essentially calls `put_user(*msg++, *buf++)` over and over until the whole message is written, and returns the number of bytes. The function `put_user()` copies from kernel memory to user memory, note it is tagged with `char __user *buf`.
+
+# The Virtual File System
+
+The VFS is the layer between a call to `write()` and the specific code responsible for dealing e.g. with ext4, btrfs, and so on.
+
+
+VFS translates pathnames into directory entries (dentries). A dentry points to an inode, a filesystem object.
+
+To open an inode, a file structure is allocated (kernel-side file descriptor). The file structure points to the dentry and operation callbacks taken from the inode; in particular, `open()` is then called so that the particular filesystem can do its work.
+
+Filesystems are (un)registered with
+
+    int (un)register_filesystem(struct file_system_type *);
+
+The registered filesystems are under `/proc/filesystems`. To mount a filesystem, VFS calls `mount0()` and a new vfsmount is attached to the mountpoint; when pathname resolution reaches the mountpoint, it jumps into the root of the vfsmount.
+
+A superblock object representes a mounted filesystem.

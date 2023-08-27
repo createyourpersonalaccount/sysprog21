@@ -48,9 +48,9 @@ In `<linux/module.h>`, the following functions are available to view or modify t
       /* ... */
     #endif
 
-## Examples
+# Examples
 
-### `chardev`
+## `chardev`
 
 We define four functions, `device_{open,release,read,write}`, which we populate a `struct file_operations` with.
 

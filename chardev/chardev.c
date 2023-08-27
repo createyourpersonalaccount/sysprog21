@@ -53,6 +53,7 @@ static char msg[BUF_LEN + 1]; /* The msg the device will give when asked */
 static struct class *cls;
 
 static struct file_operations chardev_fops = {
+	.owner = THIS_MODULE,
 	.read = device_read,
 	.write = device_write,
 	.open = device_open,
@@ -100,7 +101,6 @@ static int device_open(struct inode *inode, struct file *file)
 		return -EBUSY;
 
 	sprintf(msg, "I already told you %d times Hello world!\n", counter++);
-	try_module_get(THIS_MODULE);
 
 	return SUCCESS;
 }
@@ -110,11 +110,6 @@ static int device_release(struct inode *inode, struct file *file)
 {
 	/* We're now ready for our next caller */
 	atomic_set(&already_open, CDEV_NOT_USED);
-
-	/* Decrement the usage count, or else once you opened the
-         * file, you will never get rid of the module.
-         */
-	module_put(THIS_MODULE);
 
 	return SUCCESS;
 }

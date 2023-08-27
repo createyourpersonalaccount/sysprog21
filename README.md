@@ -47,3 +47,28 @@ In `<linux/module.h>`, the following functions are available to view or modify t
     #if LINUX_VERSION_CODE <= KERNEL_VERSION(2,6,16)
       /* ... */
     #endif
+
+## Examples
+
+### `chardev`
+
+We define four functions, `device_{open,release,read,write}`, which we populate a `struct file_operations` with.
+
+In our init function, we register a character device with `register_chrdev` so that the kernel allocates a major number for us. We have
+
+    cls = class_create(THIS_MODULE, "chardev");
+    device_create(cls, NULL, MKDEV(major, 0), NULL, "chardev");
+
+I don't know what `class_create` does, but `cls` must be deallocated with `class_destroy()`; `THIS_MODULE` is a macro to a struct and `"chardev"` is the name of the device file, which `device_create` creates. `MKDEV()` combines a major and a minor number.
+
+The four registered functions are called when a process opens/closes/reads or writes the file.
+
+Because we want to synchronize different processes, we use `<linux/atomic.h>` and `ATOMIC_INIT(val)`, `atomic_cmpxchg(&x, comp, newval)`, and `atomic_set(&x, val)`.
+
+We use `try_module_get(THIS_MODULE)` and `module_put(THIS_MODULE)` to let the kernel know yet another process is using the module, preventing the module from exiting prematurely.
+
+Now `try_module_get()` presents an issue, and there is a superior alternative. See [SA/a/6079839](https://stackoverflow.com/a/6079839).
+
+Writing to the device fails with `-EINVAL`.
+
+Reading from the device essentially calls `put_user(*msg++, *buf++)` over and over until the whole message is written, and returns the number of bytes. The function `put_user()` copies from kernel memory to user memory, note it is tagged with `char __user *buf`.

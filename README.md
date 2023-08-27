@@ -75,7 +75,7 @@ Reading from the device essentially calls `put_user(*msg++, *buf++)` over and ov
 
 ## `procfs`
 
-The init and exit functions use `proc_create()` and `proc_remove()` to create/remove the proc file.
+The init and exit functions use `proc_create()` and `proc_remove()` to create/remove the proc file. The return value is a `struct proc_dir_entry *`
 
 To them the file permissions, e.g. `0644` are passed, and a `proc_ops` struct with `.proc_read = procfile_read`.
 
@@ -86,7 +86,7 @@ The function `procfile_read` uses `copy_to_user(buffer, s, len)` and adds `*offs
 The VFS is the layer between a call to `write()` and the specific code responsible for dealing e.g. with ext4, btrfs, and so on.
 
 
-VFS translates pathnames into directory entries (dentries). A dentry points to an inode, a filesystem object.
+VFS translates pathnames into directory entries (dentries). A dentry points to an inode, a filesystem object. The inode contains information about the file, for example the file’s permissions, together with a pointer to the disk location or locations where the file’s data can be found. 
 
 To open an inode, a file structure is allocated (kernel-side file descriptor). The file structure points to the dentry and operation callbacks taken from the inode; in particular, `open()` is then called so that the particular filesystem can do its work.
 
@@ -97,3 +97,7 @@ Filesystems are (un)registered with
 The registered filesystems are under `/proc/filesystems`. To mount a filesystem, VFS calls `mount0()` and a new vfsmount is attached to the mountpoint; when pathname resolution reaches the mountpoint, it jumps into the root of the vfsmount.
 
 A superblock object representes a mounted filesystem.
+
+# TODO
+
+- [ ] What is the `loff_t*` parameter in the `.read` operations of `struct file_operations` and `struct proc_ops`?

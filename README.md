@@ -100,4 +100,7 @@ A superblock object representes a mounted filesystem.
 
 # TODO
 
-- [ ] What is the `loff_t*` parameter in the `.read` operations of `struct file_operations` and `struct proc_ops`?
+- [X] What is the `loff_t*` parameter in the `.read` operations of `struct file_operations` and `struct proc_ops`?
+
+    The offset is the current position in the file. The read operation gets called again and again until a `0` is returned.
+

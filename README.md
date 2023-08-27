@@ -77,7 +77,7 @@ Reading from the device essentially calls `put_user(*msg++, *buf++)` over and ov
 
 The init and exit functions use `proc_create()` and `proc_remove()` to create/remove the proc file. The return value is a `struct proc_dir_entry *`
 
-To them the file permissions, e.g. `0644` are passed, and a `proc_ops` struct with `.proc_read = procfile_read`.
+To them the file permissions, e.g. `0644` are passed, and a `proc_ops` struct with `.proc_read = procfile_read`. See [<linux/proc_fs.h>](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/proc_fs.h) for kernels v5.6+.
 
 The function `procfile_read` uses `copy_to_user(buffer, s, len)` and adds `*offset += len`.
 

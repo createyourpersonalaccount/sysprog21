@@ -50,7 +50,6 @@ This can all be accomplished better by the `.owner = THIS_MODULE` member of `str
     #endif
 
 # Examples
-
 ## `chardev`
 
 We define four functions, `device_{open,release,read,write}`, which we populate a `struct file_operations` with.
@@ -73,6 +72,14 @@ Now `try_module_get()` presents an issue, and there is a superior alternative. S
 Writing to the device fails with `-EINVAL`.
 
 Reading from the device essentially calls `put_user(*msg++, *buf++)` over and over until the whole message is written, and returns the number of bytes. The function `put_user()` copies from kernel memory to user memory, note it is tagged with `char __user *buf`.
+
+## `procfs`
+
+The init and exit functions use `proc_create()` and `proc_remove()` to create/remove the proc file.
+
+To them the file permissions, e.g. `0644` are passed, and a `proc_ops` struct with `.proc_read = procfile_read`.
+
+The function `procfile_read` uses `copy_to_user(buffer, s, len)` and adds `*offset += len`.
 
 # The Virtual File System
 

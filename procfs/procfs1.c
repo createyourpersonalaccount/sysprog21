@@ -11,10 +11,13 @@
 #include <linux/version.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(5, 6, 0)
+/* proc_ops are used specifically for proc management, but are a newer
+   feature. older kernels use the entire file_operations struct for
+   this info. */
 #define HAVE_PROC_OPS
 #endif
 
-#define procfs_name "helloworld"
+#define PROCFS_NAME "helloworld"
 
 static struct proc_dir_entry *our_proc_file;
 
@@ -26,8 +29,8 @@ static ssize_t procfile_read(struct file *file_pointer, char __user *buffer,
 	ssize_t ret = len;
 
 	if (*offset >= len || copy_to_user(buffer, s, len)) {
-		pr_info("copy_to_user failed\n");
-		ret = 0;
+	  pr_info("copy_to_user failed: %d\n", (int)*offset);
+	  ret = 0;
 	} else {
 		pr_info("procfile read %s\n",
 			file_pointer->f_path.dentry->d_name.name);
@@ -49,21 +52,21 @@ static const struct file_operations proc_file_fops = {
 
 static int __init procfs1_init(void)
 {
-	our_proc_file = proc_create(procfs_name, 0644, NULL, &proc_file_fops);
+	our_proc_file = proc_create(PROCFS_NAME, 0644, NULL, &proc_file_fops);
 	if (NULL == our_proc_file) {
 		proc_remove(our_proc_file);
-		pr_alert("Error:Could not initialize /proc/%s\n", procfs_name);
+		pr_alert("Error:Could not initialize /proc/%s\n", PROCFS_NAME);
 		return -ENOMEM;
 	}
 
-	pr_info("/proc/%s created\n", procfs_name);
+	pr_info("/proc/%s created\n", PROCFS_NAME);
 	return 0;
 }
 
 static void __exit procfs1_exit(void)
 {
 	proc_remove(our_proc_file);
-	pr_info("/proc/%s removed\n", procfs_name);
+	pr_info("/proc/%s removed\n", PROCFS_NAME);
 }
 
 module_init(procfs1_init);

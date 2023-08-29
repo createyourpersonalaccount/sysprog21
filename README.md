@@ -104,3 +104,5 @@ A superblock object representes a mounted filesystem.
 
     The offset is the current position in the file. The read operation gets called again and again until a `0` is returned. Notice it is us who advance the offset via a simple `+=`.
 
+- [ ] How does the sysfs example work? I don't understand
+      `kobject_create_and_add()`, especially the second argument. How is an attribute a kobject?

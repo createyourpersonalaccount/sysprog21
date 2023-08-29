@@ -41,6 +41,9 @@ static ssize_t myvariable_store(struct kobject *kobj,
 /* an attribute is a variable (in this case myvariable) with a mode
  * (0660 here).  Furthermore there's the operations show() and
  * store(): user reads from and writes to the attribute.
+ *
+ * This macro uses the variable `myvariable` to also name it
+ * `"myvariable"`.
  */
 static struct kobj_attribute myvariable_attribute =
 	__ATTR(myvariable, 0660, myvariable_show, (void *)myvariable_store);

@@ -1,4 +1,5 @@
 obj-m += hello-sysfs.o
+obj-m += simple-sysfs.o
 
 PWD := $(CURDIR)
 

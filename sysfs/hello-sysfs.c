@@ -7,6 +7,10 @@
  *
  * kobject is the glue between the device model and the sysfs
  * interface.
+ *
+ * Note that the buffers are not tagged with __user; we deal with
+ * kernel buffers here, and sysfs takes care for us of the user memory
+ * aspect.
  */
 #include <linux/fs.h>
 #include <linux/init.h>
@@ -47,6 +51,7 @@ static int __init mymodule_init(void)
 
 	pr_info("mymodule: initialised\n");
 
+        /* Allocate a kobject and set its name. */
 	mymodule = kobject_create_and_add("mymodule", kernel_kobj);
 	if (!mymodule)
 		return -ENOMEM;
@@ -63,6 +68,8 @@ static int __init mymodule_init(void)
 static void __exit mymodule_exit(void)
 {
 	pr_info("mymodule: Exit success\n");
+        /* Decrease the reference counter of the kobject; since we're
+           the sole owner, this frees the object. */
 	kobject_put(mymodule);
 }
 

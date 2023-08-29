@@ -19,10 +19,15 @@ static int __init my_init(void)
 	rcu_read_lock();
 	vpid = find_vpid(pid);
 	/* do something with vpid */
-	level = rcu_dereference(vpid)->level;
-	rcu_read_unlock();
-	pr_info("vpid->level: %u\n", level);
-	pr_info("Hello world.\n");
+        vpid = rcu_dereference(vpid);
+        if(vpid == NULL) {
+          rcu_read_unlock();
+          pr_info("find_vpid(%d) failed.\n", pid);
+        } else {
+          level = vpid->level;
+          rcu_read_unlock();
+          pr_info("vpid->level: %u\n", level);
+        }
 	return 0;
 }
 

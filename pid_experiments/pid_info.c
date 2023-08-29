@@ -14,6 +14,14 @@ MODULE_PARM_DESC(pid, "The process ID to print information of.");
 
 static int __init my_init(void)
 {
+	unsigned int level;
+	struct pid *vpid;
+	rcu_read_lock();
+	vpid = find_vpid(pid);
+	/* do something with vpid */
+	level = rcu_dereference(vpid)->level;
+	rcu_read_unlock();
+	pr_info("vpid->level: %u\n", level);
 	pr_info("Hello world.\n");
 	return 0;
 }

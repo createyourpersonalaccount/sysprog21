@@ -11,9 +11,12 @@ static struct kobject *mymodule;
 
 static int __init mymodule_init(void)
 {
-        /* Allocate a kobject and set its name and parent.  Since the
-         parent is kernel_kobj, it is added under the /sys/kernel
-         directory.  */
+        /* Equivalent to:
+         *     kobj = kobject_create();
+         *     kobject_add(kobj, parent, "%s", name);
+         * Must be freed with kobject_put().
+         * Assigning @kernel_kobj as parent makes it lie under /sys/kernel.
+         */
 	mymodule = kobject_create_and_add(SYSFS_DIR_NAME, kernel_kobj);
 	if (!mymodule)
 		return -ENOMEM;

@@ -44,6 +44,13 @@ static ssize_t myvariable_store(struct kobject *kobj,
  *
  * This macro uses the variable `myvariable` to also name it
  * `"myvariable"`.
+ *
+ * Macro is equivalent to:
+ *     { .attr = { .name = #_name,
+ *                 .mode = _mode },
+ *       .show = _show,
+ *       .store = _store
+ *     }
  */
 static struct kobj_attribute myvariable_attribute =
 	__ATTR(myvariable, 0660, myvariable_show, (void *)myvariable_store);
@@ -54,11 +61,24 @@ static int __init mymodule_init(void)
 
 	pr_info("mymodule: initialised\n");
 
-        /* Allocate a kobject and set its name. */
+        /* Equivalent to:
+         *     kobj = kobject_create();
+         *     kobject_add(kobj, parent, "%s", name);
+         * Must be freed with kobject_put().
+         * Assigning @kernel_kobj as parent makes it lie under /sys/kernel.
+         */
 	mymodule = kobject_create_and_add("mymodule", kernel_kobj);
 	if (!mymodule)
 		return -ENOMEM;
 
+        /* Equivalent to:
+         *     sysfs_create_file_ns(kobj, attr, NULL);
+         * Creates an attribute file for a kobject.
+         * Its name is attr->name and its mode is attr->mode.
+         *
+         * This function is smart to figure out .show and .store from
+         * the parent kobj_attribute.
+         */
 	error = sysfs_create_file(mymodule, &myvariable_attribute.attr);
 	if (error) {
 		pr_info("failed to create the myvariable file "

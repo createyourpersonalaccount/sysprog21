@@ -31,7 +31,7 @@ The [`struct file_operations`](https://git.kernel.org/pub/scm/linux/kernel/git/s
 
 The `struct file` represents an abstract open file.
 
-To register a major number for a character device, use either `register_chrdev_region()` or `alloc_chrdev_region()`. The former is with a fixed major number and the latter dynamically allocates one that is available. Then the functions `cdev_alloc()`, `cdev_init()`, `cdev_add()`, etc, are used.
+To register a major number for a character device, use either `register_chrdev_region()` or `alloc_chrdev_region()`. The former is with a fixed major number and the latter dynamically allocates one that is available. Then the functions `cdev_alloc()`, `cdev_init()`, `cdev_add()`, etc, are used. For an example of the cdev interface, see `ioctl/ioctl.c`.
 
 
 In `<linux/module.h>`, the following functions are available to view or modify the use counter:

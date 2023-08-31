@@ -81,6 +81,15 @@ To them the file permissions, e.g. `0644` are passed, and a `proc_ops` struct wi
 
 The function `procfile_read` uses `copy_to_user(buffer, s, len)` and adds `*offset += len`.
 
+## `ioctl`
+
+After loading the module, use `journalctl | tail` to find out the major number, and use
+
+    mknod mydevfile c <MAJOR> 0
+
+to create a device file corresponding to this driver. This char file will continuously output the configured byte value non-stop.
+
+
 # The Virtual File System
 
 The VFS is the layer between a call to `write()` and the specific code responsible for dealing e.g. with ext4, btrfs, and so on.
@@ -104,5 +113,7 @@ A superblock object representes a mounted filesystem.
 
     The offset is the current position in the file. The read operation gets called again and again until a `0` is returned. Notice it is us who advance the offset via a simple `+=`.
 
-- [ ] How does the sysfs example work? I don't understand
+- [X] How does the sysfs example work? I don't understand
       `kobject_create_and_add()`, especially the second argument. How is an attribute a kobject?
+      
+    The `kernel_kobj` file makes it a parent and so the kobject lies under `/sys/kernel`.

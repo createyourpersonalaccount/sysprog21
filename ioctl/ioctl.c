@@ -10,17 +10,23 @@
 
 #include "myheader.h"
 
-static long test_ioctl_ioctl(struct file *filp, unsigned int cmd,
-			     unsigned long arg)
+static long my_unlocked_ioctl(struct file *filp, unsigned int cmd,
+			      unsigned long arg)
 {
-	struct test_ioctl_data *ioctl_data = filp->private_data;
+	/* This is where the char devices output byte lies. */
+	struct my_data *ioctl_data = filp->private_data;
 	int retval = 0;
 	unsigned char val;
 	struct ioctl_arg data;
 	memset(&data, 0, sizeof(data));
 
+        pr_alert("%s call.\n", __func__);
+
 	switch (cmd) {
 	case IOCTL_VALSET:
+		/* @arg is the pointer to the ioctl data type (struct
+                   ioctl_arg). NB perhaps the cast should be (struct
+                   ioctl_arg __user *) instead of (int __user *).  */
 		if (copy_from_user(&data, (int __user *)arg, sizeof(data))) {
 			retval = -EFAULT;
 			goto done;
@@ -61,18 +67,22 @@ done:
 	return retval;
 }
 
-static ssize_t test_ioctl_read(struct file *filp, char __user *buf,
-			       size_t count, loff_t *f_pos)
+/* If a user reads from this device file, it never ends, always
+   outputting the same byte value. */
+static ssize_t my_read(struct file *filp, char __user *buf, size_t count,
+		       loff_t *f_pos)
 {
-	struct test_ioctl_data *ioctl_data = filp->private_data;
+	struct my_data *ioctl_data = filp->private_data;
 	unsigned char val;
 	int retval;
 	int i = 0;
 
+	/* Lock to retrieve value ... */
 	read_lock(&ioctl_data->lock);
 	val = ioctl_data->val;
 	read_unlock(&ioctl_data->lock);
 
+	/* ... and fill user buffer with it. */
 	for (; i < count; i++) {
 		if (copy_to_user(&buf[i], &val, 1)) {
 			retval = -EFAULT;
@@ -85,7 +95,7 @@ out:
 	return retval;
 }
 
-static int test_ioctl_close(struct inode *inode, struct file *filp)
+static int my_close(struct inode *inode, struct file *filp)
 {
 	pr_alert("%s call.\n", __func__);
 
@@ -97,16 +107,20 @@ static int test_ioctl_close(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-static int test_ioctl_open(struct inode *inode, struct file *filp)
+static int my_open(struct inode *inode, struct file *filp)
 {
-	struct test_ioctl_data *ioctl_data;
+	struct my_data *ioctl_data;
 
 	pr_alert("%s call.\n", __func__);
-	ioctl_data = kmalloc(sizeof(struct test_ioctl_data), GFP_KERNEL);
+	/* GFP_KERNEL is for kernel-internal memory. See
+           <linux/gfp_types.h>. */
+	ioctl_data = kmalloc(sizeof(struct my_data), GFP_KERNEL);
 
 	if (ioctl_data == NULL)
 		return -ENOMEM;
 
+	/* Initialize the lock, make up a value, and save to filp's
+           private_data field. */
 	rwlock_init(&ioctl_data->lock);
 	ioctl_data->val = 0xFF;
 	filp->private_data = ioctl_data;
@@ -116,16 +130,22 @@ static int test_ioctl_open(struct inode *inode, struct file *filp)
 
 static int __init ioctl_init(void)
 {
+	/* an integer encoding MAJOR and MINOR */
 	dev_t dev;
+
 	int alloc_ret = -1;
 	int cdev_ret = -1;
+	/* Allocate some numbers for char dev registration */
 	alloc_ret = alloc_chrdev_region(&dev, 0, num_of_dev, DRIVER_NAME);
 
 	if (alloc_ret)
 		goto error;
 
+	/* In the lines below, we create a character device. */
 	test_ioctl_major = MAJOR(dev);
+	/* Initialize the cdev struct with fops. */
 	cdev_init(&test_ioctl_cdev, &fops);
+	/* Add char device to system. */
 	cdev_ret = cdev_add(&test_ioctl_cdev, dev, num_of_dev);
 
 	if (cdev_ret)
@@ -144,6 +164,9 @@ error:
 
 static void __exit ioctl_exit(void)
 {
+	/* We know that the minor number is 0 because we fixed that
+         * magic minor number in the alloc_chrdev_region()
+         * invocation. */
 	dev_t dev = MKDEV(test_ioctl_major, 0);
 
 	cdev_del(&test_ioctl_cdev);

@@ -1,3 +1,4 @@
+/* Use this file to modify the ioctl of the device driver. */
 #include <stdio.h>
 #include <stdlib.h>
 

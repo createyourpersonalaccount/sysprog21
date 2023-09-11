@@ -3,13 +3,14 @@
 [Building external modules](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/Documentation/kbuild/modules.rst). Even more details about kernel makefiles [here](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/Documentation/kbuild/makefiles.rst).
 
 - Inspect a `.ko` file with `modinfo`.
+- View which modules are loaded and how many processes use a module with `lsmod`.
+  - Modules are also listed under `/sys/modules`; there the kernel built-in modules will be also listed.
 - Load a module with `insmod`.
   - Arguments can be passed via `insmod mymodule.ko variable=value` using [`module_param()`](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/moduleparam.h). See hello-5.c. E.g.
 
         insmod hello-5.ko mystring="foo" myintarray=-1,3
-
+  - Can't load a module if one with the same name is already loaded. This includes built-in kernel modules.
 - Remove a module with `rmmod`.
-- View how many processes use a module with `lsmod`.
 - View messages printed with `pr_info()` with `journalctl | tail`.
 - `MODULE_LICENSE()` information [here](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/module.h).
 
@@ -89,6 +90,21 @@ After loading the module, use `journalctl | tail` to find out the major number, 
 
 to create a device file corresponding to this driver. This char file will continuously output the configured byte value non-stop.
 
+
+## `syscalls`
+
+When calling a syscall, a process jumps to a location in the kernel named `system_call`. They are indexed on `sys_call_table` by the syscall number.
+
+We wish to modify `sys_call_table` to wrap our code around a particular syscall.
+
+The _control register_ `cr0` modifies the x86 processor behavior. Once the write protection `WP` flag is set, the processor disallows write attempts to read-only sections. Thus to modify the table, we must disable `WP`.
+
+We will replace `open()` with what is conceptually
+
+    new_open():
+      if proc_id() == MAGIC:
+        pr_info(report which file is being opened)
+      continue with normal open()
 
 # The Virtual File System
 

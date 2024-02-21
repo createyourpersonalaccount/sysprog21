@@ -44,7 +44,7 @@ enum {
 static atomic_t already_open = ATOMIC_INIT(CDEV_NOT_USED);
 /* The msg the device will give when asked. */
 static char msg[BUF_LEN + 1];
-/* See <https://lwn.net/Articles/31370/>. */
+/* See <https://lwn.net/Articles/128644/>. */
 static struct class *cls;
 /* This structure holds the functions to be called when a process does
  * something to the device we created. Since a pointer to this structure
@@ -62,21 +62,16 @@ static struct file_operations chardev_fops = {
 static int __init chardev_init(void)
 {
 	major = register_chrdev(0, DEVICE_NAME, &chardev_fops);
-
 	if (major < 0) {
 		pr_alert("%s: Registering char device failed with %d\n",
 			 DEVICE_NAME, major);
 		return major;
 	}
-
 	pr_info("%s: I was assigned major number %d.\n", DEVICE_NAME, major);
-
 	cls = class_create(THIS_MODULE, DEVICE_NAME);
 	device_create(cls, NULL, MKDEV(major, 0), NULL, DEVICE_NAME);
-
 	pr_info("%s: Device file created on /dev/%s\n", DEVICE_NAME,
 		DEVICE_NAME);
-
 	return 0;
 }
 

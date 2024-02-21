@@ -8,19 +8,25 @@ The build system is called kbuild.
 - Even more details about kernel makefiles [[https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/Documentation/kbuild/makefiles.rst][here]].
 - Notes online on what happens when ~make~ is executed on kbuild, <https://0xax.gitbooks.io/linux-insides/content/Misc/linux-misc-2.html>.
 
+*** Building kernel modules on Debian
+
+We need the kernel headers, which we can install with:
+
+#+begin_src sh
+  sudo apt install linux-headers-$(uname -r)
+#+end_src
+
 ** Operations on modules
 
 - =modinfo=, inspect a =.ko= file.
 - ~lsmod~, view which modules are loaded and how many processes use a module.
   - Modules are also listed under =/sys/modules=; additionally, the kernel built-in modules will be also listed there.
 - ~insmod~, load a module.
-  - Arguments can be passed via =insmod mymodule.ko variable=value= using [[https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/moduleparam.h][=module_param()=]].
+  - Arguments can be passed via =insmod mymodule.ko variable=value= using [[https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/moduleparam.h][module_param()]].
     See ~hello-5.c~. E.g.
-
     #+begin_src sh
       insmod hello-5.ko mystring="foo" myintarray=-1,3
     #+end_src
-
   - Can't load a module if one with the same name is already loaded. This includes built-in kernel modules.
 - =rmmod=, remove a module.
 - ~dmesg | tail~, view diagnostic messages printed with =pr_info()= and other similar functions.
@@ -52,7 +58,7 @@ Device files are either "character" or "block". Block devices have IO in blocks 
 
 *** Character devices
 
-The [[https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/fs.h][=struct file_operations=]] holds operation callbacks such as =read()= and =write()=. Unused operations are set to =NULL=. The variable is commonly called =fops=. =struc proc_ops= replaces =struct file_operations= for merely registering =/proc= handlers.
+The [[https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/fs.h][struct file_operations]] holds operation callbacks such as =read()= and =write()=. Unused operations are set to =NULL=. The variable is commonly called =fops=. =struc proc_ops= replaces =struct file_operations= for merely registering =/proc= handlers.
 
 The =struct file= represents an abstract open file.
 
@@ -66,7 +72,7 @@ In =<linux/module.h>=, the following functions are available to view or modify t
   module_refcount() /* Return the value of reference count of current module. */
 #+end_src
 
-This can all be accomplished better by the =.owner = THIS_MODULE= member of =struct file_operations=. See [[https://stackoverflow.com/a/6079839][SA/a/6079839]] and an examplanation of the [[https://www.kernel.org/doc/html/next/filesystems/vfs.html][=VFS=]] as well as [[https://lwn.net/Articles/22197/][lwn.net/Articles/22197/]].
+This can all be accomplished better by the =.owner = THIS_MODULE= member of =struct file_operations=. See [[https://stackoverflow.com/a/6079839][SA/a/6079839]] and an examplanation of the [[https://www.kernel.org/doc/html/next/filesystems/vfs.html][VFS]] as well as [[https://lwn.net/Articles/22197/][lwn.net/Articles/22197/]].
 
 ** Conditional compilation for different kernel versions
 
@@ -112,7 +118,7 @@ Reading from the device essentially calls =put_user(*msg++, *buf++)= over and ov
 
 The init and exit functions use =proc_create()= and =proc_remove()= to create/remove the proc file. The return value is a =struct proc_dir_entry *=
 
-To them the file permissions, e.g. =0644= are passed, and a =proc_ops= struct with =.proc_read = procfile_read=. See [[https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/proc_fs.h][<linux/proc_fs.h>]] for kernels v5.6+.
+To them the file permissions, e.g. =0644= are passed, and a =proc_ops= struct with =.proc_read = procfile_read=. See [[https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/include/linux/proc_fs.h][linux/proc_fs.h]] for kernels v5.6+.
 
 The function =procfile_read= uses =copy_to_user(buffer, s, len)= and adds =*offset += len=.
 
@@ -178,11 +184,3 @@ A superblock object representes a mounted filesystem.
   =/sys/kernel=.
 
 - [ ] What does ~class_create()~ do?
-
-* Debian guide
-
-We need the kernel headers, which we can install with:
-
-#+begin_src sh
-  sudo apt install linux-headers-$(uname -r)
-#+end_src

@@ -1,6 +1,6 @@
 * Notes on writing Linux kernel modules
 
-In these notes, we follow [[https://sysprog21.github.io/lkmpg/][The Linux Kernel Module Programming Guide]] closely. Each directory in this repository contains one or more kernel module examples, most are taken from LKMPG.
+In these notes, we follow [[https://sysprog21.github.io/lkmpg/][The Linux Kernel Module Programming Guide]] closely. Each directory in this repository contains one or more kernel module examples, most are taken from LKMPG. We attempt to tidy up the examples, modernize them, or comment on them further. In any confusion, the ultimate arbiter are the [[https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/][kernel sources]]. [[https://www.youtube.com/watch?v=o2we_B6hDrY][Use the source, Luke]].
 
 ** The build system
 

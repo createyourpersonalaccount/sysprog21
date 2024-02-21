@@ -81,6 +81,8 @@ This is an advanced situation where multiple incompatible kernel versions are wi
 
 ** Examples
 
+Each directory in this repository contains one or more kernel module examples. Here we describe them and comment on the particularities of their source code.
+
 *** =chardev=
 
 We define four functions, =device_{open,release,read,write}=, which we populate a =struct file_operations= with.

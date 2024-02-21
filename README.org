@@ -1,5 +1,7 @@
 * Notes on writing Linux kernel modules
 
+In these notes, we follow [[https://sysprog21.github.io/lkmpg/][The Linux Kernel Module Programming Guide]] closely. Each directory in this repository contains one or more kernel module examples, most are taken from LKMPG.
+
 ** The build system
 
 The build system is called kbuild.

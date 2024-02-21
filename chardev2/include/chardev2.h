@@ -1,12 +1,12 @@
-/* CHARDEV0.h - the header file with the ioctl definitions.
+/* chardev2.h - the header file with the ioctl definitions.
  *
  * The declarations here have to be in a header file, because they need
  * to be known both to the kernel module (in chardev2.c) and the process
  * calling ioctl() (in userspace_ioctl.c).
  */
 
-#ifndef CHARDEV_H
-#define CHARDEV_H
+#ifndef CHARDEV2_H_
+#define CHARDEV2_H_
 
 #include <linux/ioctl.h>
 
@@ -43,7 +43,6 @@
  */
 
 /* The name of the device file */
-#define DEVICE_FILE_NAME "char_dev"
-#define DEVICE_PATH "/dev/char_dev"
+#define DEVICE_NAME "chardev2"
 
-#endif
+#endif /* CHARDEV2_H_ */

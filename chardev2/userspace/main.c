@@ -1,4 +1,4 @@
-/*  userspace_ioctl.c - the process to use ioctl's to control the kernel module
+/*  main.c - the process to use ioctl's to control the kernel module
  *
  *  Until now we could have used cat for input and output.  But now
  *  we need to do ioctl's, which require writing our own process.
@@ -6,8 +6,9 @@
 
 /* device specifics, such as ioctl numbers and the
  * major device file. */
-#include "../chardev.h"
+#include <chardev2.h>
 
+#include <linux/limits.h>
 #include <stdio.h> /* standard I/O */
 #include <fcntl.h> /* open */
 #include <unistd.h> /* close */
@@ -77,10 +78,11 @@ int main(void)
 {
 	int file_desc, ret_val;
 	char *msg = "Message passed by ioctl\n";
-
-	file_desc = open(DEVICE_PATH, O_RDWR);
+        char device_path[PATH_MAX];
+        snprintf(device_path, sizeof device_path, "/dev/%s", DEVICE_NAME);
+	file_desc = open(device_path, O_RDWR);
 	if (file_desc < 0) {
-		printf("Can't open device file: %s, error:%d\n", DEVICE_PATH,
+		printf("Can't open device file: %s, error:%d\n", device_path,
 		       file_desc);
 		exit(EXIT_FAILURE);
 	}

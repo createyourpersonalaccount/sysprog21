@@ -126,6 +126,14 @@ Writing to the device fails with =-EINVAL=.
 
 Reading from the device essentially calls =put_user(*msg++, *buf++)= over and over until the whole message is written, and returns the number of bytes. The function =put_user()= copies from kernel memory to user memory: when a userland program attempts to read from the character device, a userland buffer is provided to kernel space for filling; note that it is attributed with ~__user~, as in =char __user *buf=.
 
+We can invoke ~trigger.sh~ every time ~chardev~ is loaded by writing the following udev rule in ~/etc/udev/rules.d/80-chardev.rules~:
+
+#+begin_src
+  SUBSYSTEM=="chardev", ACTION=="add", RUN+="/path/to/chardev/trigger.sh"
+#+end_src
+
+Assuming the path is correctly modified to point to ~trigger.sh~, and that we then run ~udevadm control --reload~, the script will be invoked whenever ~insmod chardev.ko~ is performed. We can check that it has indeed ran by inspecting its output, on ~/tmp/chardev_trigger.log~.
+
 *** =procfs=
 
 The init and exit functions use =proc_create()= and =proc_remove()= to create/remove the proc file. The return value is a =struct proc_dir_entry *=

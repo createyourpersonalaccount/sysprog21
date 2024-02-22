@@ -72,7 +72,7 @@ The [[https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/incl
 
 The =struct file= represents an abstract open file.
 
-To register a major number for a character device, use either register_chrdev_region()= or =alloc_chrdev_region()=. The former is with a fixed major number and the latter dynamically allocates one that is available. Then the functions =cdev_alloc()=, =cdev_init()=, =cdev_add()=, etc, are used. For an example of the cdev interface, see =ioctl/ioctl.c=.
+To register a major number for a character device, use either ~register_chrdev_region()~ or =alloc_chrdev_region()=. The former is with a fixed major number and the latter dynamically allocates one that is available. Then the functions =cdev_alloc()=, =cdev_init()=, =cdev_add()=, etc, are used. For an example of the cdev interface, see =ioctl/ioctl.c=.
 
 In =<linux/module.h>=, the following functions are available to view or modify the use counter:
 
@@ -133,6 +133,12 @@ We can invoke ~trigger.sh~ every time ~chardev~ is loaded by writing the followi
 #+end_src
 
 Assuming the path is correctly modified to point to ~trigger.sh~, and that we then run ~udevadm control --reload~, the script will be invoked whenever ~insmod chardev.ko~ is performed. We can check that it has indeed ran by inspecting its output, on ~/tmp/chardev_trigger.log~.
+
+*** ~chardev2~
+
+Another mechanism of communication with character devices is demonstrated: ~ioctl(2)~ calls. The function that deals with the ~ioctl~ call is ~device_ioctl()~, stored under the ~.unlocked_ioctl~ member of the fops structure. To define our own ioctls, we use the ~_IO*~ macros in ~chardev2.h~. This public header is also used by userland programs, as they also need to be able to use the ioctl macros. One important difference with the old ~chardev~ is that we no longer dynamically register a major number; instead we provide a fixed number ~MAJOR_NUM~ to ~register_chrdev()~. This is important because the device number is used in the ioctl macros.
+
+In ~chardev~ we used the ~.release~ fops, but now we use a worse alternative, ~try_module_get()~ and ~module_put()~. This shouldn't be used, but we demonstarate it regardless.
 
 *** =procfs=
 
